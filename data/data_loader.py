@@ -4,6 +4,9 @@ def CreateDataLoader(opt):
     if opt.align_data > 0:
         from data.aligned_data_loader import AlignedDataLoader
         data_loader = AlignedDataLoader()
+    elif opt.align_data < 0:
+        from data.unaligned_data_loader import UnalignedMRFDataLoader
+        data_loader = UnalignedMRFDataLoader()
     else:
         from data.unaligned_data_loader import UnalignedDataLoader
         data_loader = UnalignedDataLoader()

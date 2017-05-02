@@ -76,9 +76,9 @@ class MRFFolder(data.Dataset):
         # If there is only one path then it's from the simulation and just
         # return the relevant data.
         if len(paths) > 1:
-            islice = paths[2]
+            islice = paths[-1]
             slices = []
-            for path in paths[:2]:
+            for path in paths[:-1]:
                 s = cci.download_npy_array(path)
                 slices.append([islice, :, :])
             img = np.stack(slices, axis=2)

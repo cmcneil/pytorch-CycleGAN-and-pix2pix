@@ -8,7 +8,16 @@ class BaseOptions():
         self.initialized = False
 
     def initialize(self):
-        self.parser.add_argument('--dataroot', required=True, help='path to images (should have subfolders trainA, trainB, valA, valB, etc)')
+        # self.parser.add_argument('--dataroot', required=True, help='path to images (should have subfolders trainA, trainB, valA, valB, etc)')
+        self.parser.add_argument('--bucket_A', required=True, help='bucket name for input files')
+        self.parser.add_argument('--bucket_B', required=True, help='bucket name for output files')
+        self.parser.add_argument('--bucket_path_A', required=True, help='path in bucket A to input files')
+        self.parser.add_argument('--bucket_path_B', required=True, help='path in bucket B to input files')
+        self.parser.add_argument('--fnames_A', required=True, help='path to .npy file containing list of file names for input files')
+        self.parser.add_argument('--fnames_B', required=True, help='path to .npy file containing list of file names for output files')
+        self.parser.add_argument('--sid', required=True, help='path of .npy file containing all the subjects for all the slices')
+        self.parser.add_argument('--slice_id', required=True, help='path of .npy file containing the numbers of all the slices for each subject')
+        
         self.parser.add_argument('--batchSize', type=int, default=1, help='input batch size')
         self.parser.add_argument('--loadSize', type=int, default=286, help='scale images to this size')
         self.parser.add_argument('--fineSize', type=int, default=256, help='then crop to this size')

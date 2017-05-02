@@ -17,7 +17,7 @@ def is_image_file(filename):
     return any(filename.endswith(extension) for extension in IMG_EXTENSIONS)
 
 
-def make_dataset(bucket_path, sid, slice_id, fnames):
+def make_dataset(bucket_path, subslice, fnames):
     """
     Return list of paths in cottoncandy bucket.
 
@@ -25,27 +25,24 @@ def make_dataset(bucket_path, sid, slice_id, fnames):
         The path to the directory that has the individual subject data. Path
         should have fields to fill in, e.g. "/path/to/{subject}/"
 
-    sid : list
-        All the subject IDs as strings. Each subject should appear once for
-        each slice that was taken from the subject.
-
-    slice_id : list
-        The matching slice numbers for each subject in side. Should be ints.
+    subslice : list of tuples
+        List of (subject ID (str), slice number (int)) for every slice.
 
     fnames : list
         Names of files that should be extracted from each folder.
     """
     images = []
 
-    for isub, islice in zip(sid, slice_id)
+    for sspair in subslice:
+        isub, islice = sspair
         f_ims = []
         if len(fnames) > 1: # quantitative images
             for fname in fnames:
-                path = bucket_path.format(isub, fname)
+                path = bucket_path.format(subject=isub, fname=fname)
                 f_ims.append(path)
             f_ims.append(islice)
         else:
-            f_ims.append(bucket_path.format(isub, str(islice), fname))
+            f_ims.append(bucket_path.format(subject=isub, slice=str(islice), fname=fname))
         images.append(f_ims)
 
     return images
@@ -57,9 +54,9 @@ def default_loader(path):
 
 class MRFFolder(data.Dataset):
 
-    def __init__(self, bucket, bucket_path, sid, slice_id, fnames, return_paths=False,
+    def __init__(self, bucket, bucket_path, subslice, fnames, return_paths=False,
                  loader=None):
-        imgs = make_dataset(bucket_paths, sid, slice_id, fnames)
+        imgs = make_dataset(bucket_paths, subslice, fnames)
         if len(imgs) == 0:
             raise(RuntimeError("Found 0 images!!! AHHHHHH :0"))
         self.root = root
@@ -79,9 +76,9 @@ class MRFFolder(data.Dataset):
         # If there is only one path then it's from the simulation and just
         # return the relevant data.
         if len(paths) > 1:
-            islice = paths[2]
+            islice = paths[-1]
             slices = []
-            for path in paths[:2]:
+            for path in paths[:-1]:
                 s = cci.download_npy_array(path)
                 slices.append([islice, :, :])
             img = np.stack(slices, axis=2)

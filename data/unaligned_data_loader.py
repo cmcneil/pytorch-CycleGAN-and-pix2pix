@@ -100,13 +100,12 @@ class UnalignedMRFDataLoader(BaseDataLoader):
                                        transforms.ToTensor(),
                                        transforms.Normalize((0.5, 0.5, 0.5),
                                                             (0.5, 0.5, 0.5))])
-        sid = np.load(opt.sid)
-        slice_id = np.load(opt.slice_id)
+        subslice = np.load(opt.subslice)
         fnames = np.load(opt.fnames)
 
         # Dataset A
         dataset_A = MRFFolder(bucket=opt.bucket_A, bucket_path=opt.bucket_path_A,
-                              sid=sid, slice_id=slice_id, fnames=fnames_A,
+                              subslice=subslice, fnames=fnames_A,
                               transform=transform, return_paths=True)
         data_loader_A = torch.utils.data.DataLoader(
             dataset_A,
@@ -116,7 +115,7 @@ class UnalignedMRFDataLoader(BaseDataLoader):
 
         # Dataset B
         dataset_B = MRFFolder(bucket=opt.bucket_B, bucket_path=opt.bucket_path_B,
-                              sid=sid, slice_id=slice_id, fnames=fnames_B,
+                              subslice=subslice, fnames=fnames_B,
                               transform=transform, return_paths=True)
         data_loader_B = torch.utils.data.DataLoader(
             dataset_B,

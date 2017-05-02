@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 import numpy as np
+import custom_funcs as cust
 
 ###############################################################################
 # Functions
@@ -201,13 +202,15 @@ class ResnetBlock(nn.Module):
 # if |num_downs| == 7, image of size 128x128 will become of size 1x1
 # at the bottleneck
 class UnetGenerator(nn.Module):
-    def __init__(self, input_nc, output_nc, num_downs, ngf=64,
+    def __init__(self, input_nc, output_nc, num_downs, ngf=64, ndimred=32,
                  norm_layer=nn.BatchNorm2d, use_dropout=False, gpu_ids=[]):
         super(UnetGenerator, self).__init__()
         self.gpu_ids = gpu_ids
 
         # currently support only input_nc == output_nc
-        assert(input_nc == output_nc)
+        # assert(input_nc == output_nc)
+        # if input_nc > output_nc:
+
 
         # construct unet structure
         unet_block = UnetSkipConnectionBlock(ngf * 8, ngf * 8, innermost=True)
@@ -216,7 +219,18 @@ class UnetGenerator(nn.Module):
         unet_block = UnetSkipConnectionBlock(ngf * 4, ngf * 8, unet_block)
         unet_block = UnetSkipConnectionBlock(ngf * 2, ngf * 4, unet_block)
         unet_block = UnetSkipConnectionBlock(ngf, ngf * 2, unet_block)
-        unet_block = UnetSkipConnectionBlock(output_nc, ngf, unet_block, outermost=True)
+        unet_block = UnetSkipConnectionBlock(ndimred, ngf, unet_block, outermost=False)
+
+        input_dimred = nn.Conv2d(input_nc, ndimred, kernel_size=1,
+                                 stride=1, padding=1)
+        self.laploss = cust.laplacian_loss(input_dimred.weight)
+        dimred_lrelu = nn.LeakyReLU(0.2, True)
+
+        output_im = nn.Conv2d(ndimred, output_nc, kernel_size=1, stride=1, padding=1)
+
+        bigmod = [input_dimred, dimred_lrelu, nn.Dropout(0.5), unet_block,
+                  output_im]
+        asym_model = nn.Sequential(input_dimred, dimred_lrelu, nn.Dropout(0.5), unet_block, output_im)
 
         self.model = unet_block
 

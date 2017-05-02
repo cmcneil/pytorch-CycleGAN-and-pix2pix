@@ -2,6 +2,7 @@ import torch.utils.data
 import torchvision.transforms as transforms
 from data.base_data_loader import BaseDataLoader
 from data.image_folder import ImageFolder
+from data.mrf_folder import MRFFolder
 # pip install future --upgrade
 from builtins import object
 from pdb import set_trace as st
@@ -89,3 +90,48 @@ class UnalignedDataLoader(BaseDataLoader):
 
     def __len__(self):
         return min(max(len(self.dataset_A), len(self.dataset_B)), self.opt.max_dataset_size)
+
+class UnalignedMRFDataLoader(BaseDataLoader):
+    def initialize(self, opt):
+        BaseDataLoader.initialize(self, opt)
+        transform = transforms.Compose([
+                                       transforms.Scale(opt.loadSize),
+                                       transforms.RandomCrop(opt.fineSize),
+                                       transforms.ToTensor(),
+                                       transforms.Normalize((0.5, 0.5, 0.5),
+                                                            (0.5, 0.5, 0.5))])
+        sid = np.load(opt.sid)
+        slice_id = np.load(opt.slice_id)
+        fnames = np.load(opt.fnames)
+
+        # Dataset A
+        dataset_A = MRFFolder(bucket=opt.bucket_A, bucket_path=opt.bucket_path_A,
+                              sid=sid, slice_id=slice_id, fnames=fnames_A,
+                              transform=transform, return_paths=True)
+        data_loader_A = torch.utils.data.DataLoader(
+            dataset_A,
+            batch_size=self.opt.batchSize,
+            shuffle=not self.opt.serial_batches,
+            num_workers=int(self.opt.nThreads))
+
+        # Dataset B
+        dataset_B = MRFFolder(bucket=opt.bucket_B, bucket_path=opt.bucket_path_B,
+                              sid=sid, slice_id=slice_id, fnames=fnames_B,
+                              transform=transform, return_paths=True)
+        data_loader_B = torch.utils.data.DataLoader(
+            dataset_B,
+            batch_size=self.opt.batchSize,
+            shuffle=not self.opt.serial_batches,
+            num_workers=int(self.opt.nThreads))
+        self.dataset_A = dataset_A
+        self.dataset_B = dataset_B
+        self.paired_data = PairedData(data_loader_A, data_loader_B, self.opt.max_dataset_size)
+
+    def name(self):
+        return 'UnalignedDataLoader'
+
+    def load_data(self):
+        return self.paired_data
+
+    def __len__(self):
+return min(max(len(self.dataset_A), len(self.dataset_B)), self.opt.max_dataset_size)

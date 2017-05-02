@@ -41,11 +41,11 @@ def make_dataset(bucket_path, sid, slice_id, fnames):
         f_ims = []
         if len(fnames) > 1: # quantitative images
             for fname in fnames:
-                path = bucket_path.format(isub, fname)
+                path = bucket_path.format(subject=isub, fname=fname)
                 f_ims.append(path)
             f_ims.append(islice)
         else:
-            f_ims.append(bucket_path.format(isub, str(islice), fname))
+            f_ims.append(bucket_path.format(subject=isub, slice=str(islice), fname=fname))
         images.append(f_ims)
 
     return images

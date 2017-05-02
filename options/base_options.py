@@ -15,8 +15,7 @@ class BaseOptions():
         self.parser.add_argument('--bucket_path_B', required=True, type=str, help='path in bucket B to input files')
         self.parser.add_argument('--fnames_A', required=True, type=str, help='path to .npy file containing list of file names for input files')
         self.parser.add_argument('--fnames_B', required=True, type=str, help='path to .npy file containing list of file names for output files')
-        self.parser.add_argument('--sid', required=True, type=str, help='path of .npy file containing all the subjects for all the slices')
-        self.parser.add_argument('--slice_id', required=True, type=str, help='path of .npy file containing the numbers of all the slices for each subject')
+        self.parser.add_argument('--subslice', required=True, type=str, help='path of .npy file containing list of sub/slice for all slices')
 
         self.parser.add_argument('--batchSize', type=int, default=1, help='input batch size')
         self.parser.add_argument('--loadSize', type=int, default=286, help='scale images to this size')

@@ -6,15 +6,23 @@
 ################################################################################
 
 import torch.utils.data as data
-import cottoncandy as cc
 
 import os
 import os.path
+import cottoncandy as cc
+from scipy import ndimage
 
 
 
-def is_image_file(filename):
-    return any(filename.endswith(extension) for extension in IMG_EXTENSIONS)
+def make_bias_field(t1w, t2w):
+    """
+    Return bias field image given T1w and T2w images.
+    """
+    biasf = np.sqrt(t1w * tw2)
+    biasf[biasf < 100] = 0
+    biasf_smooth = ndimage.gaussian_filter(biasf, sigma=(2, 2, 2))
+    biasf_smooth[biasf_smooth < 100] = 10**5
+    return biasf_smooth
 
 
 def make_dataset(bucket_path, subslice, fnames):
@@ -65,22 +73,39 @@ class MRFFolder(data.Dataset):
         self.return_paths = return_paths
         self.loader = loader
         self.bucket = bucket
+        self.TE = 3.53
 
     def __getitem__(self, index):
         cci = cc.get_interface(self.bucket)
 
         paths = self.imgs[index]
 
-        # Get the relevant slices and stack them into an image
-        # if there is more than one path, i.e. there is a qT1 and qT2 volume.
+        # If there is more than one path -> quant t1, t2; weighted t1, t2
+        # use weighted t1/t2 to find proton density and stack with qT1, qT2
+        #
         # If there is only one path then it's from the simulation and just
         # return the relevant data.
         if len(paths) > 1:
             islice = paths[-1]
             slices = []
-            for path in paths[:-1]:
+
+            # First two entries are qT1, qT2
+            for path in paths[:2]:
                 s = cci.download_npy_array(path)
-                slices.append([islice, :, :])
+                slices.append(s[islice, :, :])
+
+            # Get proton density from T1w, T2w
+            t1w = cci.download_npy_array(path[2])
+            t2w = cci.download_npy_array(path[3])
+            biasf = make_bias_field(t1w, t2w)
+            t2w_bc = t2w / biasf
+            t2w_bc_sub = t2w_bc[90:200, :, :] # ugh hard coding
+            # Proton density img
+            pd = t2w_bc_sub[islice, :, :] / np.exp(-self.TE / slices[1])
+            pd[np.isnan(pd)] = 0
+            pd[np.isinf(pd)] = 0
+            slices.append(pd)
+
             img = np.stack(slices, axis=2)
         else:
             img = cci.download_npy_array(paths[0])

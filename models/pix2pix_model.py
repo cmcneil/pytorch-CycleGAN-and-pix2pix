@@ -7,6 +7,9 @@ import util.util as util
 from util.image_pool import ImagePool
 from .base_model import BaseModel
 from . import networks
+import custom_loss as cust
+
+from IPython.core.debugger import set_trace
 
 class Pix2PixModel(BaseModel):
     def name(self):
@@ -58,9 +61,11 @@ class Pix2PixModel(BaseModel):
         input_B = input['B' if AtoB else 'A']
         self.input_A.resize_(input_A.size()).copy_(input_A)
         self.input_B.resize_(input_B.size()).copy_(input_B)
-        self.image_paths = input['A_paths' if AtoB else 'B_paths']
+        # self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
     def forward(self):
+        # print '...Input size:'
+        # print self.input_A.size()
         self.real_A = Variable(self.input_A)
         self.fake_B = self.netG.forward(self.real_A)
         self.real_B = Variable(self.input_B)
@@ -72,8 +77,8 @@ class Pix2PixModel(BaseModel):
         self.real_B = Variable(self.input_B, volatile=True)
 
     #get image paths
-    def get_image_paths(self):
-        return self.image_paths
+    # def get_image_paths(self):
+    #     return self.image_paths
 
     def backward_D(self):
         # Fake
@@ -90,7 +95,7 @@ class Pix2PixModel(BaseModel):
         # Combined loss
         self.loss_D = (self.loss_D_fake + self.loss_D_real) * 0.5
 
-        self.loss_D.backward()
+        self.loss_D.backward(retain_variables=True)
 
     def backward_G(self):
         # First, G(A) should fake the discriminator
@@ -100,10 +105,12 @@ class Pix2PixModel(BaseModel):
 
         # Second, G(A) = B
         self.loss_G_L1 = self.criterionL1(self.fake_B, self.real_B) * self.opt.lambda_A
+        # set_trace()
+        conv_dimred = self.netG.children().next().children().next()
+        self.laplace_loss = cust.laplacian_loss(conv_dimred.weight)
+        self.loss_G = self.loss_G_GAN + self.loss_G_L1 + self.opt.laploss*self.laplace_loss
 
-        self.loss_G = self.loss_G_GAN + self.loss_G_L1 + opt.lap_loss*self.netG.laploss
-
-        self.loss_G.backward()
+        self.loss_G.backward(retain_variables=True)
 
     def optimize_parameters(self):
         self.forward()
@@ -120,7 +127,8 @@ class Pix2PixModel(BaseModel):
         return OrderedDict([('G_GAN', self.loss_G_GAN.data[0]),
                 ('G_L1', self.loss_G_L1.data[0]),
                 ('D_real', self.loss_D_real.data[0]),
-                ('D_fake', self.loss_D_fake.data[0])
+                ('D_fake', self.loss_D_fake.data[0]),
+                ('G_Laplace', self.laplace_loss.data[0]),
         ])
 
     def get_current_visuals(self):

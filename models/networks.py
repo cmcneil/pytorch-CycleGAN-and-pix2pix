@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 import numpy as np
-import custom_funcs as cust
+from collections import OrderedDict
 
 ###############################################################################
 # Functions
@@ -20,6 +20,7 @@ def weights_init(m):
 
 def define_G(input_nc, output_nc, ngf, which_model_netG, norm, use_dropout=False, gpu_ids=[]):
     netG = None
+    # gpu_ids = []
     use_gpu = len(gpu_ids) > 0
     if norm == 'batch':
         norm_layer = nn.BatchNorm2d
@@ -202,8 +203,8 @@ class ResnetBlock(nn.Module):
 # if |num_downs| == 7, image of size 128x128 will become of size 1x1
 # at the bottleneck
 class UnetGenerator(nn.Module):
-    def __init__(self, input_nc, output_nc, num_downs, ngf=64, ndimred=32,
-                 norm_layer=nn.BatchNorm2d, use_dropout=False, gpu_ids=[]):
+    def __init__(self, input_nc, output_nc, num_downs, ngf=64,
+                 norm_layer=nn.BatchNorm2d, ndimred=32, use_dropout=False, gpu_ids=[]):
         super(UnetGenerator, self).__init__()
         self.gpu_ids = gpu_ids
 
@@ -222,22 +223,29 @@ class UnetGenerator(nn.Module):
         unet_block = UnetSkipConnectionBlock(ndimred, ngf, unet_block, outermost=False)
 
         input_dimred = nn.Conv2d(input_nc, ndimred, kernel_size=1,
-                                 stride=1, padding=1)
-        self.laploss = cust.laplacian_loss(input_dimred.weight)
+                                 stride=1, padding=0)
+
         dimred_lrelu = nn.LeakyReLU(0.2, True)
 
-        output_im = nn.Conv2d(ndimred, output_nc, kernel_size=1, stride=1, padding=1)
+        output_im = nn.Conv2d(2*ndimred, output_nc, kernel_size=1, stride=1, padding=0)
 
         bigmod = [input_dimred, dimred_lrelu, nn.Dropout(0.5), unet_block,
                   output_im]
-        asym_model = nn.Sequential(input_dimred, dimred_lrelu, nn.Dropout(0.5), unet_block, output_im)
+        asym_model = nn.Sequential(OrderedDict([
+                                   ('dimred', input_dimred),
+                                   ('dimred_relu', dimred_lrelu),
+                                   ('dropout', nn.Dropout(0.5)),
+                                   ('unet', unet_block),
+                                   ('toim', output_im)]))
 
-        self.model = unet_block
+        self.model = asym_model
 
     def forward(self, input):
         if  self.gpu_ids and isinstance(input.data, torch.cuda.FloatTensor):
+            # print('input: ' + str(input.size))
             return nn.parallel.data_parallel(self.model, input, self.gpu_ids)
         else:
+            # print 'model input: ' + str(input)
             return self.model(input)
 
 
@@ -265,6 +273,7 @@ class UnetSkipConnectionBlock(nn.Module):
             up = [uprelu, upconv, nn.Tanh()]
             model = down + [submodule] + up
         elif innermost:
+            # print "We're at the innermost"
             upconv = nn.ConvTranspose2d(inner_nc, outer_nc,
                                         kernel_size=4, stride=2,
                                         padding=1)
@@ -289,6 +298,8 @@ class UnetSkipConnectionBlock(nn.Module):
         if self.outermost:
             return self.model(x)
         else:
+            # print '...unet concat block: ' + str(x.size())
+            # print '...Unet block concat: ' + str(self.model(x).size()) + ', ' + str(x.size())
             return torch.cat([self.model(x), x], 1)
 
 

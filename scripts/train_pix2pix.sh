@@ -1,1 +1,17 @@
-python train.py --bucket_A carson_public_datasets --bucket_B carson_public_datasets --bucket_path_A /human_connectome_project/3T/{subject}/simulations/{slice}/{fname} --bucket_path_B /human_connectome_project/3T/{subject}/{fname} --fnames_A /home/jlg/carson/glab/mrf/sim_fnames.npy --fnames_B /home/jlg/carson/glab/mrf/quant_fnames.npy --subslice /home/jlg/carson/glab/mrf/train_data_list.npy  --name mrf --model pix2pix --which_model_netG unet_256 --which_direction AtoB --lambda_A 100 --align_data -1 --no_lsgan --use_dropout --laploss 0.2 --serial_batches False
+python train.py \
+--bucket_A carson_public_datasets \
+--bucket_B carson_public_datasets \
+--dataset_cc_path /human_connectome_project/3T/{subject}/mrf_training/{slice}/{fname} \
+--subslices /auto/k1/carson/glab/mrf/train_data_list.npy  \
+--name mrf \
+--model pix2pix \
+--which_model_netG unet_128 \
+--which_direction AtoB \
+--lambda_A 100 \
+--no_lsgan \
+--use_dropout \
+--laploss 0.2 \
+--input_nc 498 \
+--output_nc 3 \
+--batchSize 16 \
+--print_freq 10

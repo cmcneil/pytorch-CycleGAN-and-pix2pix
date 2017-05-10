@@ -11,11 +11,10 @@ class BaseOptions():
         # self.parser.add_argument('--dataroot', required=True, help='path to images (should have subfolders trainA, trainB, valA, valB, etc)')
         self.parser.add_argument('--bucket_A', required=True, type=str, help='bucket name for input files')
         self.parser.add_argument('--bucket_B', required=True, type=str, help='bucket name for output files')
-        self.parser.add_argument('--bucket_path_A', required=True, type=str, help='path in bucket A to input files')
-        self.parser.add_argument('--bucket_path_B', required=True, type=str, help='path in bucket B to input files')
-        self.parser.add_argument('--fnames_A', required=True, type=str, help='path to .npy file containing list of file names for input files')
-        self.parser.add_argument('--fnames_B', required=True, type=str, help='path to .npy file containing list of file names for output files')
-        self.parser.add_argument('--subslice', required=True, type=str, help='path of .npy file containing list of sub/slice for all slices')
+        self.parser.add_argument('--dataset_cc_path', required=True, type=str, help='path in bucket A to input files')
+        # self.parser.add_argument('--fnames_A', required=True, type=str, help='path to .npy file containing list of file names for input files')
+        # self.parser.add_argument('--fnames_B', required=True, type=str, help='path to .npy file containing list of file names for output files')
+        self.parser.add_argument('--subslices', required=True, type=str, help='path of .npy file containing list of sub/slice for all slices')
 
         self.parser.add_argument('--batchSize', type=int, default=1, help='input batch size')
         self.parser.add_argument('--loadSize', type=int, default=286, help='scale images to this size')
@@ -30,7 +29,7 @@ class BaseOptions():
         self.parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2')
         self.parser.add_argument('--flip'  , action='store_true', help='if flip the images for data argumentation')
         self.parser.add_argument('--name', type=str, default='experiment_name', help='name of the experiment. It decides where to store samples and models')
-        self.parser.add_argument('--align_data', type=int,
+        self.parser.add_argument('--align_data', action='store_true',
                                 help='if 1: aligned, -1: mrf, otherwise: unaligned')
         self.parser.add_argument('--model', type=str, default='cycle_gan',
                                  help='chooses which model to use. cycle_gan, one_direction_test, pix2pix, ...')
@@ -44,7 +43,7 @@ class BaseOptions():
         self.parser.add_argument('--identity', type=float, default=0.0, help='use identity mapping. Setting identity other than 1 has an effect of scaling the weight of the identity mapping loss. For example, if the weight of the identity loss should be 10 times smaller than the weight of the reconstruction loss, please set optidentity = 0.1')
         self.parser.add_argument('--use_dropout', action='store_true', help='use dropout for the generator')
         self.parser.add_argument('--max_dataset_size', type=int, default=float("inf"), help='Maximum number of samples allowed per dataset. If the dataset directory contains more than max_dataset_size, only a subset is loaded.')
-        self.parser.add_argument('--lap_loss', type=float, default=0.1, help='How much to penalize the 2nd derivative of the laplacian penalty.')
+        self.parser.add_argument('--laploss', type=float, default=0.1, help='How much to penalize the 2nd derivative of the laplacian penalty.')
         self.initialized = True
 
     def parse(self):

@@ -1,12 +1,12 @@
 
 def CreateDataLoader(opt):
     data_loader = None
-    if opt.align_data > 0:
-        from data.aligned_data_loader import AlignedDataLoader
-        data_loader = AlignedDataLoader()
-    elif opt.align_data < 0:
+    if opt.name == 'mrf':
         from data.unaligned_data_loader import UnalignedMRFDataLoader
         data_loader = UnalignedMRFDataLoader()
+    elif opt.align_data:
+        from data.aligned_data_loader import AlignedDataLoader
+        data_loader = AlignedDataLoader()
     else:
         from data.unaligned_data_loader import UnalignedDataLoader
         data_loader = UnalignedDataLoader()

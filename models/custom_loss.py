@@ -1,5 +1,6 @@
 import torch
 
+
 def laplacian_loss1d(input, epsilon=1e-12):
     # print input.size()
     norm_factor = torch.squeeze(torch.clamp(
@@ -15,10 +16,10 @@ def laplacian_loss(input, epsilon=1e-12):
     """
     # print "called laplacian loss!"
     w = torch.squeeze(input)
-    lap = laplacian_loss1d(w[:, 0])
-    for i in xrange(1, w.size()[1]):
+    lap = torch.pow(laplacian_loss1d(w[0, :]), 2.0)
+    for i in xrange(1, w.size()[0]):
         # print "called laplacian loss!"
-        lap = lap + torch.pow(laplacian_loss1d(w[:, i]), 2.0)
+        lap = lap + torch.pow(laplacian_loss1d(w[i, :]), 2.0)
     return lap
 
 ### TF version:

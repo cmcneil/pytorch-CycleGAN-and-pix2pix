@@ -1,16 +1,15 @@
 python train.py \
---bucket_A carson_public_datasets \
---bucket_B carson_public_datasets \
---dataset_cc_path /human_connectome_project/3T/{subject}/mrf_training/{slice}/{fname} \
 --subslices /auto/k1/carson/glab/mrf/train_data_list.npy  \
 --name mrf \
 --model pix2pix \
+--dataroot /home/jlg/carson/Desktop/mrf_dataset \
+--align_data \
 --which_model_netG unet_128 \
 --which_direction AtoB \
---lambda_A 100 \
+--lambda_A 10 \
 --no_lsgan \
 --use_dropout \
---laploss 0.2 \
+--laploss 0.001 \
 --input_nc 498 \
 --output_nc 3 \
 --batchSize 16 \

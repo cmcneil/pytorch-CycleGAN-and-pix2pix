@@ -4,15 +4,9 @@
 # Modified the original code so that it also loads images from the current
 # directory as well as the subdirectories
 ################################################################################
-import torch
 import torch.utils.data as data
 
-import os
-import os.path
 import glabtools.io as io
-from scipy import ndimage
-import skimage.transform
-import numpy as np
 
 # def make_dataset(bucket_path, subslice, fnames):
 #     """

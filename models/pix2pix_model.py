@@ -26,12 +26,12 @@ class Pix2PixModel(BaseModel):
 
         # load/define networks
         self.netG = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf,
-                                    opt.which_model_netG, opt.norm, opt.use_dropout, self.gpu_ids)
+                                      opt.which_model_netG, opt.norm, opt.use_dropout, self.gpu_ids)
         if self.isTrain:
             use_sigmoid = opt.no_lsgan
             self.netD = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf,
-                                         opt.which_model_netD,
-                                         opt.n_layers_D, use_sigmoid, self.gpu_ids)
+                                          opt.which_model_netD,
+                                          opt.n_layers_D, use_sigmoid, self.gpu_ids)
         if not self.isTrain or opt.continue_train:
             self.load_network(self.netG, 'G', opt.which_epoch)
             if self.isTrain:
@@ -95,7 +95,7 @@ class Pix2PixModel(BaseModel):
         # Combined loss
         self.loss_D = (self.loss_D_fake + self.loss_D_real) * 0.5
 
-        self.loss_D.backward(retain_variables=True)
+        self.loss_D.backward()
 
     def backward_G(self):
         # First, G(A) should fake the discriminator
@@ -106,11 +106,11 @@ class Pix2PixModel(BaseModel):
         # Second, G(A) = B
         self.loss_G_L1 = self.criterionL1(self.fake_B, self.real_B) * self.opt.lambda_A
         # set_trace()
-        conv_dimred = self.netG.children().next().children().next()
-        self.laplace_loss = cust.laplacian_loss(conv_dimred.weight)
+        self.conv_dimred = self.netG.children().next().children().next()
+        self.laplace_loss = cust.laplacian_loss(self.conv_dimred.weight)
         self.loss_G = self.loss_G_GAN + self.loss_G_L1 + self.opt.laploss*self.laplace_loss
 
-        self.loss_G.backward(retain_variables=True)
+        self.loss_G.backward()
 
     def optimize_parameters(self):
         self.forward()
@@ -132,14 +132,27 @@ class Pix2PixModel(BaseModel):
         ])
 
     def get_current_visuals(self):
-        real_A = util.tensor2im(self.real_A.data)
-        fake_B = util.tensor2im(self.fake_B.data)
-        real_B = util.tensor2im(self.real_B.data)
+        real_A = util.tensor2np(self.real_A.data, idx=10)
+        fake_B = util.tensor2np(self.fake_B.data, idx=0)
+        real_B = util.tensor2np(self.real_B.data, idx=0)
+        print '...Shape real A: ' + str(np.shape(real_A))
         return OrderedDict([('real_A', real_A), ('fake_B', fake_B), ('real_B', real_B)])
+
+    def get_filters(self):
+        # filts = self.conv_dimred.weight[0].cpu().float()
+        # print torch.squeeze(self.conv_dimred.weight).cpu()
+        filts = torch.squeeze(self.conv_dimred.weight).cpu().float().data.numpy()
+        # print filts
+        # print filts.size()
+        return filts.T
 
     def save(self, label):
         self.save_network(self.netG, 'G', label, self.gpu_ids)
         self.save_network(self.netD, 'D', label, self.gpu_ids)
+
+    def load(self, epoch_label):
+        self.load_network(self.netG, 'G', epoch_label)
+        self.load_network(self.netD, 'D', epoch_label)
 
     def update_learning_rate(self):
         lrd = self.opt.lr / self.opt.niter_decay

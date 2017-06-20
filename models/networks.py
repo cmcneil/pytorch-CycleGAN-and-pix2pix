@@ -223,7 +223,7 @@ class UnetGenerator(nn.Module):
         unet_block = UnetSkipConnectionBlock(ndimred, ngf, unet_block, outermost=False)
 
         input_dimred = nn.Conv2d(input_nc, ndimred, kernel_size=1,
-                                 stride=1, padding=0)
+                                 stride=1, padding=0, bias=True)
 
         dimred_lrelu = nn.LeakyReLU(0.2, True)
 
@@ -241,7 +241,7 @@ class UnetGenerator(nn.Module):
         self.model = asym_model
 
     def forward(self, input):
-        if  self.gpu_ids and isinstance(input.data, torch.cuda.FloatTensor):
+        if self.gpu_ids and isinstance(input.data, torch.cuda.FloatTensor):
             # print('input: ' + str(input.size))
             return nn.parallel.data_parallel(self.model, input, self.gpu_ids)
         else:

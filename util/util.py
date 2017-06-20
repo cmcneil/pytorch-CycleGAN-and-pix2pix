@@ -7,12 +7,20 @@ import numpy as np
 import os
 import collections
 
+
 # Converts a Tensor into a Numpy array
 # |imtype|: the desired type of the converted numpy array
-def tensor2im(image_tensor, imtype=np.uint8):
+def tensor2im(image_tensor, imtype=np.uint8, greyscale=False, gs_index=0):
     image_numpy = image_tensor[0].cpu().float().numpy()
-    image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0
+    if greyscale:
+        image_numpy = image_numpy[:, :, gs_index] / np.max(image_numpy[:, :, gs_index])
+    else:
+        image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0
     return image_numpy.astype(imtype)
+
+
+def tensor2np(data_tensor, idx=0):
+    return data_tensor[0].cpu().float().numpy()[idx, :, :]
 
 
 def diagnose_network(net, name='network'):
@@ -32,6 +40,7 @@ def save_image(image_numpy, image_path):
     image_pil = Image.fromarray(image_numpy)
     image_pil.save(image_path)
 
+
 def info(object, spacing=10, collapse=1):
     """Print methods and doc strings.
     Takes module, class, list, dictionary, or string."""
@@ -40,13 +49,15 @@ def info(object, spacing=10, collapse=1):
     print( "\n".join(["%s %s" %
                      (method.ljust(spacing),
                       processFunc(str(getattr(object, method).__doc__)))
-                     for method in methodList]) )
+                     for method in methodList]))
+
 
 def varname(p):
     for line in inspect.getframeinfo(inspect.currentframe().f_back)[3]:
         m = re.search(r'\bvarname\s*\(\s*([A-Za-z_][A-Za-z0-9_]*)\s*\)', line)
         if m:
             return m.group(1)
+
 
 def print_numpy(x, val=True, shp=False):
     x = x.astype(np.float64)

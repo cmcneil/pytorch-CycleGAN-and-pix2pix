@@ -22,6 +22,15 @@ class Visualizer():
             print('create web directory %s...' % self.web_dir)
             util.mkdirs([self.web_dir, self.img_dir])
 
+    def display_current_heatmaps(self, visuals, epoch):
+        if self.display_id > 0: # show images in the browser
+            idx = 1
+            for label, np_data in visuals.items():
+                #image_numpy = np.flipud(image_numpy)
+                self.vis.heatmap(np_data, opts=dict(title=label),
+                                 win=self.display_id + idx)
+                idx += 1
+
 
     # |visuals|: dictionary of images to display or save
     def display_current_results(self, visuals, epoch):
@@ -29,11 +38,11 @@ class Visualizer():
             idx = 1
             for label, image_numpy in visuals.items():
                 #image_numpy = np.flipud(image_numpy)
-                self.vis.image(image_numpy.transpose([2,0,1]), opts=dict(title=label),
-                                   win=self.display_id + idx)
+                self.vis.image(image_numpy.transpose([2, 0, 1]), opts=dict(title=label),
+                               win=self.display_id + idx)
                 idx += 1
 
-        if self.use_html: # save images to a html file
+        if self.use_html:  # save images to a html file
             for label, image_numpy in visuals.items():
                 img_path = os.path.join(self.img_dir, 'epoch%.3d_%s.png' % (epoch, label))
                 util.save_image(image_numpy, img_path)
@@ -68,6 +77,17 @@ class Visualizer():
                 'xlabel': 'epoch',
                 'ylabel': 'loss'},
             win=self.display_id)
+
+    def plot_current_filters(self, epoch, opt, filters):
+        nfilt = np.shape(filters)[-1]
+        ntime = np.shape(filters)[-2]
+        self.vis.line(
+            X=np.stack([np.arange(ntime)]*nfilt, 1),
+            Y=filters,
+            opts={'title': 'compression filters',
+                  'xlabel': 'tr#'},
+            win=5
+        )
 
     # errors: same format as |errors| of plotCurrentErrors
     def print_current_errors(self, epoch, i, errors, start_time):

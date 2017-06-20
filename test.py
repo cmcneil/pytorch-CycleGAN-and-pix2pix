@@ -6,7 +6,6 @@ opt = TestOptions().parse()  # set CUDA_VISIBLE_DEVICES before import torch
 from data.data_loader import CreateDataLoader
 from models.models import create_model
 from util.visualizer import Visualizer
-from pdb import set_trace as st
 from util import html
 
 opt.nThreads = 1   # test code only supports nThreads=1

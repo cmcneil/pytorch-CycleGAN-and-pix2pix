@@ -11,7 +11,10 @@ class BaseModel():
         # self.gpu_ids = []
         self.isTrain = opt.isTrain
         self.Tensor = torch.cuda.FloatTensor if self.gpu_ids else torch.Tensor
-        self.save_dir = os.path.join(opt.checkpoints_dir, opt.name)
+        if opt.load_dir is not None:
+            self.save_dir = os.path.join(opt.checkpoints_dir, opt.load_dir)
+        else:
+            self.save_dir = os.path.join(opt.checkpoints_dir, opt.name)
 
     def set_input(self, input):
         self.input = input

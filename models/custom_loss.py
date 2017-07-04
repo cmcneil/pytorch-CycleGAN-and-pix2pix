@@ -22,6 +22,34 @@ def laplacian_loss(input, epsilon=1e-12):
         lap = lap + torch.pow(laplacian_loss1d(w[i, :]), 2.0)
     return lap
 
+
+def orthoreg_loss(input, lambda_coeff=8.0, epsilon=1e-12):
+    """
+    Orthoreg Loss from https://prlz77.github.io/iclr2017-paper/
+
+    Args:
+        input: pytorch Variable. Assumed to be of shape (nfilters, size_input)
+        lambda_coeff: float. Controls the maximum angle between two feature vectors that will
+            cause them to be regularized. 8.0 => about 90deg.
+    """
+    w_unorm = torch.squeeze(input)
+    w = w_unorm / torch.clamp(torch.sum(w_unorm**2, 1)
+                              .expand(w_unorm.size()), min=epsilon)
+    wwt = torch.mm(w, torch.t(w))
+    all_dist_loss = torch.log(1 + torch.exp(lambda_coeff*(wwt - 1.0)))
+    selector = torch.autograd.Variable(1.0 - torch.eye(w.size()[0])).cuda()
+    sum_dist_loss = torch.sum(torch.mm(all_dist_loss, selector))
+    return sum_dist_loss / w.size()[0]
+
+    # for i in range(w.size()[0]):
+    #     for j in range(w.size()[0]):
+    #         if i == j:
+    #             continue
+    #         ang = torch.dot(w[i, :], w[j, :])
+            # torch.log(torch.exp((ang - 1.0)*lambda_coeff) + 1.0)
+
+
+
 ### TF version:
 # def laplacian_loss(self, X, lambda_lap=1., axis=0):
 #     X = tf.squeeze(X)

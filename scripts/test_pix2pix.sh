@@ -1,1 +1,11 @@
-python test.py --dataroot ./datasets/facades --name facades_pix2pix --model pix2pix --which_model_netG unet_256 --which_direction BtoA --align_data --use_dropout
+python test.py \
+--dataroot /home/jlg/carson/Desktop/mrf_dataset \
+--name mrf \
+--model pix2pix \
+--which_model_netG unet_128 \
+--which_direction AtoB \
+--align_data \
+--input_nc 498 \
+--output_nc 3 \
+--use_dropout \
+--load_dir mrfl1

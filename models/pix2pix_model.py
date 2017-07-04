@@ -108,7 +108,12 @@ class Pix2PixModel(BaseModel):
         # set_trace()
         self.conv_dimred = self.netG.children().next().children().next()
         self.laplace_loss = cust.laplacian_loss(self.conv_dimred.weight)
-        self.loss_G = self.loss_G_GAN + self.loss_G_L1 + self.opt.laploss*self.laplace_loss
+        self.orthoreg_loss = cust.orthoreg_loss(self.conv_dimred.weight)
+        # print 'ganloss: ' + str(self.opt.ganloss)
+        self.loss_G = (self.opt.ganloss * self.loss_G_GAN + self.loss_G_L1
+                       + self.opt.laploss*self.laplace_loss
+                       + self.opt.orthoregloss*self.orthoreg_loss)
+        # self.loss_G = self.loss_G_L1 + self.opt.laploss*self.laplace_loss
 
         self.loss_G.backward()
 
@@ -124,11 +129,13 @@ class Pix2PixModel(BaseModel):
         self.optimizer_G.step()
 
     def get_current_errors(self):
-        return OrderedDict([('G_GAN', self.loss_G_GAN.data[0]),
-                ('G_L1', self.loss_G_L1.data[0]),
-                ('D_real', self.loss_D_real.data[0]),
-                ('D_fake', self.loss_D_fake.data[0]),
-                ('G_Laplace', self.laplace_loss.data[0]),
+        return OrderedDict([
+                ('G_GAN', self.opt.ganloss*self.loss_G_GAN.data[0]),
+                ('G_L1', self.opt.lambda_A*self.loss_G_L1.data[0]),
+                ('D_real', self.opt.ganloss*self.loss_D_real.data[0]),
+                ('D_fake', self.opt.ganloss*self.loss_D_fake.data[0]),
+                ('G_Laplace', self.opt.laploss*self.laplace_loss.data[0]),
+                ('G_Orthoreg', self.opt.orthoregloss*self.orthoreg_loss.data[0]),
         ])
 
     def get_current_visuals(self):

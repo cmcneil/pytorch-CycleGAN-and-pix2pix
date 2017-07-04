@@ -229,12 +229,12 @@ class UnetGenerator(nn.Module):
 
         output_im = nn.Conv2d(2*ndimred, output_nc, kernel_size=1, stride=1, padding=0)
 
-        bigmod = [input_dimred, dimred_lrelu, nn.Dropout(0.5), unet_block,
-                  output_im]
+        # bigmod = [input_dimred, dimred_lrelu, unet_block,
+        #           output_im]
         asym_model = nn.Sequential(OrderedDict([
                                    ('dimred', input_dimred),
                                    ('dimred_relu', dimred_lrelu),
-                                   ('dropout', nn.Dropout(0.5)),
+                                   ('dropout', nn.Dropout(0.0)),
                                    ('unet', unet_block),
                                    ('toim', output_im)]))
 

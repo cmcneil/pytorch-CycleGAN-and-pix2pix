@@ -14,7 +14,7 @@ class BaseOptions():
         # self.parser.add_argument('--dataset_cc_path', required=True, type=str, help='path in bucket A to input files')
         # self.parser.add_argument('--fnames_A', required=True, type=str, help='path to .npy file containing list of file names for input files')
         # self.parser.add_argument('--fnames_B', required=True, type=str, help='path to .npy file containing list of file names for output files')
-        self.parser.add_argument('--subslices', required=True, type=str, help='path of .npy file containing list of sub/slice for all slices')
+        # self.parser.add_argument('--subslices', required=True, type=str, help='path of .npy file containing list of sub/slice for all slices')
 
         self.parser.add_argument('--batchSize', type=int, default=1, help='input batch size')
         self.parser.add_argument('--loadSize', type=int, default=286, help='scale images to this size')
@@ -44,6 +44,7 @@ class BaseOptions():
         self.parser.add_argument('--use_dropout', action='store_true', help='use dropout for the generator')
         self.parser.add_argument('--max_dataset_size', type=int, default=float("inf"), help='Maximum number of samples allowed per dataset. If the dataset directory contains more than max_dataset_size, only a subset is loaded.')
         self.parser.add_argument('--laploss', type=float, default=0.1, help='How much to penalize the 2nd derivative of the laplacian penalty.')
+        self.parser.add_argument('--load_dir', type=str, default='', help='Which directory to load model from.')
         self.initialized = True
 
     def parse(self):

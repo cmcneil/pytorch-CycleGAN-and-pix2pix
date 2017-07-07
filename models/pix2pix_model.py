@@ -61,6 +61,8 @@ class Pix2PixModel(BaseModel):
         input_B = input['B' if AtoB else 'A']
         self.input_A.resize_(input_A.size()).copy_(input_A)
         self.input_B.resize_(input_B.size()).copy_(input_B)
+        # print self.input_A
+        # print self.input_B
         # self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
     def forward(self):
@@ -139,9 +141,10 @@ class Pix2PixModel(BaseModel):
         ])
 
     def get_current_visuals(self):
+
         real_A = util.tensor2np(self.real_A.data, idx=10)
-        fake_B = util.tensor2np(self.fake_B.data, idx=0)
-        real_B = util.tensor2np(self.real_B.data, idx=0)
+        fake_B = util.tensor2np(self.fake_B.data, idx=self.opt.display_channel)
+        real_B = util.tensor2np(self.real_B.data, idx=self.opt.display_channel)
         print '...Shape real A: ' + str(np.shape(real_A))
         return OrderedDict([('real_A', real_A), ('fake_B', fake_B), ('real_B', real_B)])
 

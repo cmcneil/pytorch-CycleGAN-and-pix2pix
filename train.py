@@ -2,6 +2,7 @@ import time
 import sys
 from options.train_options import TrainOptions
 opt = TrainOptions().parse()  # set CUDA_VISIBLE_DEVICES before import torch
+# opt.gpu_ids = []
 
 from data.data_loader import CreateDataLoader
 from models.models import create_model

@@ -9,7 +9,7 @@ python train.py \
 --no_lsgan \
 --use_dropout \
 --laploss 0.01 \
---input_nc 498 \
+--input_nc 500 \
 --output_nc 3 \
 --batchSize 16 \
 --print_freq 10 \

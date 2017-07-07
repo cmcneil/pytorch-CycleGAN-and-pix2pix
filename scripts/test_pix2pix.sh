@@ -5,7 +5,8 @@ python test.py \
 --which_model_netG unet_128 \
 --which_direction AtoB \
 --align_data \
---input_nc 498 \
+--input_nc 500 \
 --output_nc 3 \
 --use_dropout \
---load_dir mrfl1
+--load_dir smooth_best \
+--display_channel 2

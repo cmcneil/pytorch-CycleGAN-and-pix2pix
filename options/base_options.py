@@ -46,6 +46,7 @@ class BaseOptions():
         self.parser.add_argument('--laploss', type=float, default=0.1, help='How much to penalize the 2nd derivative of the laplacian penalty.')
         self.parser.add_argument('--load_dir', type=str, default='', help='Which directory to load model from.')
         self.parser.add_argument('--display_channel', type=int, default=0, help='the output channel to display in figures.')
+        # self.parser.add_argument('--limit_len', type=int, default=None, help='specifies how much of the input sequence to train off of.')
         self.initialized = True
 
     def parse(self):

@@ -67,7 +67,7 @@ class AlignedNpDataLoader(BaseDataLoader):
         # Dataset A
         dataset = NpFolder(root=opt.dataroot + '/' + opt.phase,
                            input_name='mrf.npy', label_name='t1_t2_pd.npy',
-                           return_paths=True)
+                           return_paths=True, input_nc=opt.input_nc)
         print '.......Length of dataset: ' + str(len(dataset))
         data_loader = torch.utils.data.DataLoader(
             dataset,

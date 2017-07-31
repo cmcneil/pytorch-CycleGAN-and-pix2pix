@@ -9,7 +9,7 @@ import random
 class NpFolder(data.Dataset):
 
     def __init__(self, root=None, input_name=None, label_name=None,
-                 transform=None, return_paths=False):
+                 transform=None, return_paths=False, input_nc=None):
         """
         """
         print "data root: " + str(root)
@@ -28,6 +28,7 @@ class NpFolder(data.Dataset):
         self.input_name = input_name
         self.label_name = label_name
         self.return_paths = return_paths
+        self.input_nc = input_nc
         # print subslices
 
     def __getitem__(self, index):
@@ -39,6 +40,8 @@ class NpFolder(data.Dataset):
         output_path = os.path.join(path, self.label_name)
 
         indata = np.load(input_path)
+        if self.input_nc is not None:
+            indata = indata[:self.input_nc, ...]
         outdata = np.load(output_path)
         return {'A': indata, 'B': outdata}
 

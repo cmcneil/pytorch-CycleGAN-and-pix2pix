@@ -29,7 +29,8 @@ class Pix2PixModel(BaseModel):
                                       opt.which_model_netG, opt.norm, opt.use_dropout, self.gpu_ids)
         if self.isTrain:
             use_sigmoid = opt.no_lsgan
-            self.netD = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf,
+            self.netD = networks.define_D(opt.input_nc + opt.output_nc,
+                                          opt.ndf,
                                           opt.which_model_netD,
                                           opt.n_layers_D, use_sigmoid, self.gpu_ids)
         if not self.isTrain or opt.continue_train:
@@ -86,7 +87,7 @@ class Pix2PixModel(BaseModel):
         # Fake
         # stop backprop to the generator by detaching fake_B
         fake_AB = self.fake_AB_pool.query(torch.cat((self.real_A, self.fake_B), 1))
-        self.pred_fake = self.netD.forward(fake_AB.detach())
+        self.pred_fake = self.netD.forward(fake_AB.detach())  # fake_AB.detach()
         self.loss_D_fake = self.criterionGAN(self.pred_fake, False)
 
         # Real
@@ -107,14 +108,21 @@ class Pix2PixModel(BaseModel):
 
         # Second, G(A) = B
         self.loss_G_L1 = self.criterionL1(self.fake_B, self.real_B) * self.opt.lambda_A
+        # print '...real A: ' + str(self.real_A)
+        # print '...fake B: ' + str(self.fake_B)
+        # print '...real B: ' + str(self.real_B)
         # set_trace()
         self.conv_dimred = self.netG.children().next().children().next()
+        # print self.conv_dimred.weight
         self.laplace_loss = cust.laplacian_loss(self.conv_dimred.weight)
-        self.orthoreg_loss = cust.orthoreg_loss(self.conv_dimred.weight)
+        self.orthoreg_loss = cust.orthoreg_loss(self.conv_dimred.weight,
+                                                gpu_ids=self.gpu_ids)
         # print 'ganloss: ' + str(self.opt.ganloss)
         self.loss_G = (self.opt.ganloss * self.loss_G_GAN + self.loss_G_L1
                        + self.opt.laploss*self.laplace_loss
                        + self.opt.orthoregloss*self.orthoreg_loss)
+        # print self.orthoreg_loss
+                    #    + self.opt.orthoregloss*self.orthoreg_loss)
         # self.loss_G = self.loss_G_L1 + self.opt.laploss*self.laplace_loss
 
         self.loss_G.backward()
@@ -137,7 +145,7 @@ class Pix2PixModel(BaseModel):
                 ('D_real', self.opt.ganloss*self.loss_D_real.data[0]),
                 ('D_fake', self.opt.ganloss*self.loss_D_fake.data[0]),
                 ('G_Laplace', self.opt.laploss*self.laplace_loss.data[0]),
-                ('G_Orthoreg', self.opt.orthoregloss*self.orthoreg_loss.data[0]),
+                ('G_Orthoreg', self.orthoreg_loss.data[0]),
         ])
 
     def get_current_visuals(self):

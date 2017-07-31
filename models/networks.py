@@ -50,6 +50,7 @@ def define_G(input_nc, output_nc, ngf, which_model_netG, norm, use_dropout=False
 def define_D(input_nc, ndf, which_model_netD,
              n_layers_D=3, use_sigmoid=False, gpu_ids=[]):
     netD = None
+    # gpu_ids = []
     use_gpu = len(gpu_ids) > 0
     if use_gpu:
         assert(torch.cuda.is_available())
@@ -224,6 +225,7 @@ class UnetGenerator(nn.Module):
 
         input_dimred = nn.Conv2d(input_nc, ndimred, kernel_size=1,
                                  stride=1, padding=0, bias=True)
+        print "...input_nc: " + str(input_nc)
 
         dimred_lrelu = nn.LeakyReLU(0.2, True)
 

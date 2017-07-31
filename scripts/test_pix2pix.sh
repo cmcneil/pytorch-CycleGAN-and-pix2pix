@@ -9,4 +9,4 @@ python test.py \
 --output_nc 3 \
 --use_dropout \
 --load_dir smooth_best \
---display_channel 2
+--display_channel 0

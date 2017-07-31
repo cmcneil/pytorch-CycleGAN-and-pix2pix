@@ -1,7 +1,7 @@
 python train.py \
 --name mrf \
 --model pix2pix \
---dataroot /home/jlg/carson/Desktop/mrf_dataset \
+--dataroot /home/jlg/carson/Desktop/retproj_dataset \
 --align_data \
 --which_model_netG unet_128 \
 --which_direction AtoB \

@@ -31,7 +31,8 @@ for epoch in range(1, opt.niter + opt.niter_decay + 1):
             if total_steps % opt.display_freq == 0:
                 # print model.get_current_visuals()
                 visualizer.display_current_heatmaps(model.get_current_visuals(), epoch)
-                visualizer.plot_current_filters(epoch, opt, model.get_filters())
+                visualizer.display_current_ims(model.get_current_ims(), epoch)
+                # visualizer.plot_current_filters(epoch, opt, model.get_filters())
 
             if total_steps % opt.print_freq == 0:
                 errors = model.get_current_errors()

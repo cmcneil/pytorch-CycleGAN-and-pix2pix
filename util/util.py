@@ -19,8 +19,8 @@ def tensor2im(image_tensor, imtype=np.uint8, greyscale=False, gs_index=0):
     return image_numpy.astype(imtype)
 
 
-def tensor2np(data_tensor, idx=0):
-    return data_tensor[0].cpu().float().numpy()[idx, :, :]
+def tensor2np(data_tensor):
+    return data_tensor[0].cpu().float().numpy()
 
 
 def diagnose_network(net, name='network'):

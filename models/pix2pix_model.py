@@ -8,6 +8,7 @@ from util.image_pool import ImagePool
 from .base_model import BaseModel
 from . import networks
 import custom_loss as cust
+from cone.image import conformal
 
 from IPython.core.debugger import set_trace
 
@@ -55,6 +56,8 @@ class Pix2PixModel(BaseModel):
             networks.print_network(self.netG)
             networks.print_network(self.netD)
             print('-----------------------------------------------')
+
+        self.conformal_mapper = conformal.FGSquircularMapper(res=128)
 
     def set_input(self, input):
         AtoB = self.opt.which_direction == 'AtoB'
@@ -150,11 +153,16 @@ class Pix2PixModel(BaseModel):
 
     def get_current_visuals(self):
 
-        real_A = util.tensor2np(self.real_A.data, idx=10)
-        fake_B = util.tensor2np(self.fake_B.data, idx=self.opt.display_channel)
-        real_B = util.tensor2np(self.real_B.data, idx=self.opt.display_channel)
+        real_A = util.tensor2np(self.real_A.data)
+
         print '...Shape real A: ' + str(np.shape(real_A))
-        return OrderedDict([('real_A', real_A), ('fake_B', fake_B), ('real_B', real_B)])
+        return OrderedDict([('real_A', real_A)])
+
+    def get_current_ims(self):
+        fake_B = util.tensor2np(self.fake_B.data)
+        # self.conformal_mapper.square_to_disk(
+        real_B = util.tensor2np(self.real_B.data)
+        return OrderedDict([('fake_B', fake_B), ('real_B', real_B)])
 
     def get_filters(self):
         # filts = self.conv_dimred.weight[0].cpu().float()

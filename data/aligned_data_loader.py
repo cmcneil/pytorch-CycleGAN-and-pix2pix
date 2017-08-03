@@ -7,6 +7,7 @@ from data.np_folder import NpFolder
 # from pdb import set_trace as st
 # pip install future --upgrade
 from builtins import object
+from cone.image import conformal
 
 
 class PairedData(object):
@@ -65,9 +66,14 @@ class AlignedNpDataLoader(BaseDataLoader):
         self.fineSize = opt.fineSize
 
         # Dataset A
+        if opt.warp_to_square:
+            conformal_mapper = conformal.FGSquircularMapper(res=128)
+        else:
+            conformal_mapper = None
         dataset = NpFolder(root=opt.dataroot + '/' + opt.phase,
-                           input_name='mrf.npy', label_name='t1_t2_pd.npy',
-                           return_paths=True, input_nc=opt.input_nc)
+                           input_name='mri.npy', label_name='im.npy',
+                           return_paths=True, input_nc=opt.input_nc,
+                           conformal_mapper=conformal_mapper)
         print '.......Length of dataset: ' + str(len(dataset))
         data_loader = torch.utils.data.DataLoader(
             dataset,

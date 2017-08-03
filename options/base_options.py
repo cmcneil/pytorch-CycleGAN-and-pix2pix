@@ -15,7 +15,7 @@ class BaseOptions():
         # self.parser.add_argument('--fnames_A', required=True, type=str, help='path to .npy file containing list of file names for input files')
         # self.parser.add_argument('--fnames_B', required=True, type=str, help='path to .npy file containing list of file names for output files')
         # self.parser.add_argument('--subslices', required=True, type=str, help='path of .npy file containing list of sub/slice for all slices')
-
+        self.parser.add_argument('--warp_to_square', action='store_true', help='Run a conformal map on the data to map it to a square.')
         self.parser.add_argument('--batchSize', type=int, default=1, help='input batch size')
         self.parser.add_argument('--loadSize', type=int, default=286, help='scale images to this size')
         self.parser.add_argument('--fineSize', type=int, default=256, help='then crop to this size')

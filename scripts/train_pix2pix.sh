@@ -1,22 +1,25 @@
 python train.py \
 --name mrf \
 --model pix2pix \
---dataroot /home/jlg/carson/Desktop/retproj_dataset \
+--dataroot /home/jlg/carson/Desktop/retinproj_dataset \
 --align_data \
 --which_model_netG unet_128 \
 --which_direction AtoB \
---lambda_A 20 \
+--lambda_A 1.0 \
 --no_lsgan \
 --use_dropout \
---input_nc 100 \
+--input_nc 7 \
 --output_nc 3 \
---batchSize 16 \
+--batchSize 64 \
 --print_freq 10 \
 --ganloss 5.0 \
---orthoregloss 0.0001 \
---laploss 1000.0 \
---print_freq 1
-# --lr 0.0000000002
+--orthoregloss 0.0 \
+--laploss 0.0 \
+--print_freq 1 \
+--niter 1000 \
+--lr 0.000015 \
+--warp_to_square
+
 
 # --orthoregloss 10.0 \
 # --lr 0.00002

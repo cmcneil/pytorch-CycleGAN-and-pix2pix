@@ -27,10 +27,21 @@ class Visualizer():
             idx = 1
             for label, np_data in visuals.items():
                 #image_numpy = np.flipud(image_numpy)
-                self.vis.heatmap(np_data, opts=dict(title=label),
+                self.vis.heatmap(np_data[0, :, :].transpose(),
+                                 opts=dict(title=label, colormap='bwr', xmin='-3.0', xmax='3.0'),
                                  win=self.display_id + idx)
                 idx += 1
 
+    def display_current_ims(self, ims, epoch):
+        if self.display_id > 0:  # show images in the browser
+            idx = 2
+            for label, image_numpy in ims.items():
+                image_numpy = (image_numpy * 255.0).astype(np.uint8)
+                print 'shape im: ' + str(np.shape(image_numpy))
+                self.vis.image(image_numpy.transpose([0, 2, 1]),
+                               opts=dict(title=label),
+                               win=self.display_id + idx)
+                idx += 1
 
     # |visuals|: dictionary of images to display or save
     def display_current_results(self, visuals, epoch):

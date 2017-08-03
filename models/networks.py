@@ -221,7 +221,8 @@ class UnetGenerator(nn.Module):
         unet_block = UnetSkipConnectionBlock(ngf * 4, ngf * 8, unet_block)
         unet_block = UnetSkipConnectionBlock(ngf * 2, ngf * 4, unet_block)
         unet_block = UnetSkipConnectionBlock(ngf, ngf * 2, unet_block)
-        unet_block = UnetSkipConnectionBlock(ndimred, ngf, unet_block, outermost=False)
+        unet_block = UnetSkipConnectionBlock(ndimred, ngf, unet_block,
+                                             outermost=False, output_nc=output_nc)
 
         input_dimred = nn.Conv2d(input_nc, ndimred, kernel_size=1,
                                  stride=1, padding=0, bias=True)

@@ -1,5 +1,6 @@
 import time
 import os
+import numpy as np
 import matplotlib.pyplot as plt
 
 from options.test_options import TestOptions
@@ -12,28 +13,23 @@ from util import html
 
 
 opt.nThreads = 1   # test code only supports nThreads=1
-opt.batchSize = 1  # test code only supports batchSize=1
 opt.serial_batches = True  # no shuffle
 
 data_loader = CreateDataLoader(opt)
 dataset = data_loader.load_data()
 model = create_model(opt)
 visualizer = Visualizer(opt)
-# create website
-# web_dir = os.path.join(opt.results_dir, opt.name, '%s_%s' % (opt.phase, opt.which_epoch))
-# webpage = html.HTML(web_dir, 'Experiment = %s, Phase = %s, Epoch = %s'
-#                     % (opt.name, opt.phase, opt.which_epoch))
+
 # test
 for i, data in enumerate(dataset):
     if i >= opt.how_many:
         break
     model.set_input(data)
     model.test()
-    visuals = model.get_current_visuals()
+    visuals = model.get_current_ims(whole_batch=True)
+    print np.shape(visuals)
     for label, np_data in visuals.items():
-        plt.imsave('../images/im_' + label + '_' + str(i) + '.png', np_data, cmap='viridis')
-    # img_path = model.get_image_paths()
-    # print('process image... %s' % img_path)
-    # visualizer.save_images(webpage, visuals, img_path)
-
-# webpage.save()
+        print np.shape(np_data)
+        for j in range(np.shape(np_data)[0]):
+            plt.imsave('../images/im_' + label + '_' + str(i*opt.batchSize+j) + '.png',
+                       np_data[j, ...].T, cmap='viridis')

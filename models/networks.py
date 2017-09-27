@@ -221,27 +221,10 @@ class UnetGenerator(nn.Module):
         unet_block = UnetSkipConnectionBlock(ngf * 4, ngf * 8, unet_block)
         unet_block = UnetSkipConnectionBlock(ngf * 2, ngf * 4, unet_block)
         unet_block = UnetSkipConnectionBlock(ngf, ngf * 2, unet_block)
-        unet_block = UnetSkipConnectionBlock(ndimred, ngf, unet_block,
-                                             outermost=False, output_nc=output_nc)
+        unet_block = UnetSkipConnectionBlock(input_nc, ngf, unet_block,
+                                             outermost=True, output_nc=output_nc)
 
-        input_dimred = nn.Conv2d(input_nc, ndimred, kernel_size=1,
-                                 stride=1, padding=0, bias=True)
-        print "...input_nc: " + str(input_nc)
-
-        dimred_lrelu = nn.LeakyReLU(0.2, True)
-
-        output_im = nn.Conv2d(2*ndimred, output_nc, kernel_size=1, stride=1, padding=0)
-
-        # bigmod = [input_dimred, dimred_lrelu, unet_block,
-        #           output_im]
-        asym_model = nn.Sequential(OrderedDict([
-                                   ('dimred', input_dimred),
-                                   ('dimred_relu', dimred_lrelu),
-                                   ('dropout', nn.Dropout(0.0)),
-                                   ('unet', unet_block),
-                                   ('toim', output_im)]))
-
-        self.model = asym_model
+        self.model = unet_block
 
     def forward(self, input):
         if self.gpu_ids and isinstance(input.data, torch.cuda.FloatTensor):
@@ -257,7 +240,8 @@ class UnetGenerator(nn.Module):
 #   |-- downsampling -- |submodule| -- upsampling --|
 class UnetSkipConnectionBlock(nn.Module):
     def __init__(self, outer_nc, inner_nc,
-                 submodule=None, outermost=False, innermost=False, use_dropout=False):
+                 submodule=None, outermost=False, innermost=False,
+                 output_nc=None, use_dropout=False):
         super(UnetSkipConnectionBlock, self).__init__()
         self.outermost = outermost
 
@@ -269,7 +253,11 @@ class UnetSkipConnectionBlock(nn.Module):
         upnorm = nn.BatchNorm2d(outer_nc)
 
         if outermost:
-            upconv = nn.ConvTranspose2d(inner_nc * 2, outer_nc,
+            if output_nc is not None:
+                upchan = output_nc
+            else:
+                upchan = output_nc
+            upconv = nn.ConvTranspose2d(inner_nc * 2, upchan,
                                         kernel_size=4, stride=2,
                                         padding=1)
             down = [downconv]
@@ -350,7 +338,7 @@ class NLayerDiscriminator(nn.Module):
         self.model = nn.Sequential(*sequence)
 
     def forward(self, input):
-        if len(self.gpu_ids)  and isinstance(input.data, torch.cuda.FloatTensor):
+        if len(self.gpu_ids) and isinstance(input.data, torch.cuda.FloatTensor):
             return nn.parallel.data_parallel(self.model, input, self.gpu_ids)
         else:
             return self.model(input)

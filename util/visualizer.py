@@ -36,9 +36,11 @@ class Visualizer():
         if self.display_id > 0:  # show images in the browser
             idx = 2
             for label, image_numpy in ims.items():
-                image_numpy = (image_numpy * 255.0).astype(np.uint8)
+                # image_numpy = (image_numpy * 255.0).astype(np.uint8)
+                print label
                 print 'shape im: ' + str(np.shape(image_numpy))
-                self.vis.image(image_numpy.transpose([0, 2, 1]),
+                print 'max im: ' + str(np.max(image_numpy))
+                self.vis.image(image_numpy.transpose([0, 2, 1]), #[::-1, ...],
                                opts=dict(title=label),
                                win=self.display_id + idx)
                 idx += 1
@@ -49,7 +51,9 @@ class Visualizer():
             idx = 1
             for label, image_numpy in visuals.items():
                 #image_numpy = np.flipud(image_numpy)
-                self.vis.image(image_numpy.transpose([2, 0, 1]), opts=dict(title=label),
+                im_disp = image_numpy.transpose([2, 0, 1]).astype(np.float32)/255.0
+                print "disp curr results: " + str(np.shape(im_disp)) + ", " + str(np.max(im_disp))
+                self.vis.image(im_disp, opts=dict(title=label),
                                win=self.display_id + idx)
                 idx += 1
 

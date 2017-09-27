@@ -6,7 +6,10 @@ python test.py \
 --which_direction AtoB \
 --align_data \
 --input_nc 7 \
+--batchSize 64 \
 --output_nc 3 \
+--load_dir current_best \
+--warp_to_square \
 --use_dropout \
---load_dir smooth_best
+--how_many 1
 #--display_channel 0

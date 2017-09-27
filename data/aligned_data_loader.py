@@ -80,7 +80,6 @@ class AlignedNpDataLoader(BaseDataLoader):
             batch_size=self.opt.batchSize,
             shuffle=True,
             num_workers=int(self.opt.nThreads))
-        # self.loader_iter_test = iter(data_loader)
 
         data_loader = data_loader
         self.dataset = dataset

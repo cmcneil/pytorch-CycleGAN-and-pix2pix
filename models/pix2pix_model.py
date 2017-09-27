@@ -65,7 +65,9 @@ class Pix2PixModel(BaseModel):
         input_B = input['B' if AtoB else 'A']
         self.input_A.resize_(input_A.size()).copy_(input_A)
         self.input_B.resize_(input_B.size()).copy_(input_B)
+        # print "input A: " + str(self.input_A.size())
         # print self.input_A
+        # print "input B: " + str(self.input_B.size())
         # print self.input_B
         # self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
@@ -115,27 +117,29 @@ class Pix2PixModel(BaseModel):
         # print '...fake B: ' + str(self.fake_B)
         # print '...real B: ' + str(self.real_B)
         # set_trace()
-        self.conv_dimred = self.netG.children().next().children().next()
+        # self.conv_dimred = self.netG.children().next().children().next()
         # print self.conv_dimred.weight
-        self.laplace_loss = cust.laplacian_loss(self.conv_dimred.weight)
-        self.orthoreg_loss = cust.orthoreg_loss(self.conv_dimred.weight,
-                                                gpu_ids=self.gpu_ids)
+        # self.laplace_loss = cust.laplacian_loss(self.conv_dimred.weight)
+        # self.orthoreg_loss = cust.orthoreg_loss(self.conv_dimred.weight,
+        #                                         gpu_ids=self.gpu_ids)
         # print 'ganloss: ' + str(self.opt.ganloss)
-        self.loss_G = (self.opt.ganloss * self.loss_G_GAN + self.loss_G_L1
-                       + self.opt.laploss*self.laplace_loss
-                       + self.opt.orthoregloss*self.orthoreg_loss)
+        self.loss_G = (self.opt.ganloss * self.loss_G_GAN + self.loss_G_L1)
+                    #    + self.opt.laploss*self.laplace_loss
+                    #    + self.opt.orthoregloss*self.orthoreg_loss)
         # print self.orthoreg_loss
                     #    + self.opt.orthoregloss*self.orthoreg_loss)
         # self.loss_G = self.loss_G_L1 + self.opt.laploss*self.laplace_loss
 
         self.loss_G.backward()
 
-    def optimize_parameters(self):
+    def optimize_parameters(self, only_d=False):
         self.forward()
 
         self.optimizer_D.zero_grad()
         self.backward_D()
         self.optimizer_D.step()
+        if only_d:
+            return
 
         self.optimizer_G.zero_grad()
         self.backward_G()
@@ -147,8 +151,8 @@ class Pix2PixModel(BaseModel):
                 ('G_L1', self.opt.lambda_A*self.loss_G_L1.data[0]),
                 ('D_real', self.opt.ganloss*self.loss_D_real.data[0]),
                 ('D_fake', self.opt.ganloss*self.loss_D_fake.data[0]),
-                ('G_Laplace', self.opt.laploss*self.laplace_loss.data[0]),
-                ('G_Orthoreg', self.orthoreg_loss.data[0]),
+                # ('G_Laplace', self.opt.laploss*self.laplace_loss.data[0]),
+                # ('G_Orthoreg', self.orthoreg_loss.data[0]),
         ])
 
     def get_current_visuals(self):
@@ -158,10 +162,10 @@ class Pix2PixModel(BaseModel):
         print '...Shape real A: ' + str(np.shape(real_A))
         return OrderedDict([('real_A', real_A)])
 
-    def get_current_ims(self):
-        fake_B = util.tensor2np(self.fake_B.data)
+    def get_current_ims(self, whole_batch=False):
+        fake_B = util.tensor2np(self.fake_B.data, whole_batch=whole_batch)
         # self.conformal_mapper.square_to_disk(
-        real_B = util.tensor2np(self.real_B.data)
+        real_B = util.tensor2np(self.real_B.data, whole_batch=whole_batch)
         return OrderedDict([('fake_B', fake_B), ('real_B', real_B)])
 
     def get_filters(self):

@@ -26,7 +26,10 @@ for epoch in range(1, opt.niter + opt.niter_decay + 1):
             total_steps += opt.batchSize
             epoch_iter = total_steps - dataset_size * (epoch - 1)
             model.set_input(data)
-            model.optimize_parameters()
+            if i == 0 and epoch == 1:
+                model.optimize_parameters()
+            # else:
+            model.optimize_parameters(only_d=True)
 
             if total_steps % opt.display_freq == 0:
                 # print model.get_current_visuals()

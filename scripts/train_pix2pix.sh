@@ -1,24 +1,27 @@
 python train.py \
 --name mrf \
 --model pix2pix \
---dataroot /home/jlg/carson/Desktop/retinproj_dataset \
+--dataroot /home/jlg/carson/Desktop/snmovie_retinproj_dataset \
 --align_data \
 --which_model_netG unet_128 \
+--which_model_netD n_layers \
+--n_layers_D 1 \
 --which_direction AtoB \
---lambda_A 1.0 \
+--lambda_A 0.0 \
 --no_lsgan \
 --use_dropout \
---input_nc 7 \
+--input_nc 21 \
 --output_nc 3 \
---batchSize 64 \
+--batchSize 32 \
 --print_freq 10 \
---ganloss 5.0 \
---orthoregloss 0.0 \
---laploss 0.0 \
+--ganloss 1.0 \
 --print_freq 1 \
 --niter 1000 \
---lr 0.000015 \
+--lr 0.001 \
 --warp_to_square
+#--load_dir current_best \
+#--continue_train \
+
 
 
 # --orthoregloss 10.0 \

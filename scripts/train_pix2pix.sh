@@ -16,7 +16,7 @@ python train.py \
 --print_freq 10 \
 --ganloss 1.0 \
 --print_freq 1 \
---niter 1000 \
+--niter 10000 \
 --lr 0.001 \
 --warp_to_square
 #--load_dir current_best \

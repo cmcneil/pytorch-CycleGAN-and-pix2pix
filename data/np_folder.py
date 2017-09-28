@@ -24,6 +24,9 @@ class NpFolder(data.Dataset):
         self.return_paths = return_paths
         self.input_nc = input_nc
         self.conformal_mapper = conformal_mapper
+        print '******************'
+        print "self.ims: " + str(self.ims)
+        print '*********'
 
     def __getitem__(self, index):
         n = self.ims[index]

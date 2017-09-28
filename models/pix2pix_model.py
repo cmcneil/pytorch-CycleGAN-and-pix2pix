@@ -105,7 +105,7 @@ class Pix2PixModel(BaseModel):
 
         self.loss_D.backward()
 
-    def backward_G(self):
+    def backward_G(self, apply_grads=True):
         # First, G(A) should fake the discriminator
         fake_AB = torch.cat((self.real_A, self.fake_B), 1)
         pred_fake = self.netD.forward(fake_AB)
@@ -130,7 +130,8 @@ class Pix2PixModel(BaseModel):
                     #    + self.opt.orthoregloss*self.orthoreg_loss)
         # self.loss_G = self.loss_G_L1 + self.opt.laploss*self.laplace_loss
 
-        self.loss_G.backward()
+        if apply_grads:
+            self.loss_G.backward()
 
     def optimize_parameters(self, only_d=False):
         self.forward()
@@ -138,12 +139,13 @@ class Pix2PixModel(BaseModel):
         self.optimizer_D.zero_grad()
         self.backward_D()
         self.optimizer_D.step()
-        if only_d:
-            return
+        # if only_d:
+        #     return
 
         self.optimizer_G.zero_grad()
-        self.backward_G()
-        self.optimizer_G.step()
+        self.backward_G(apply_grads=not only_d)
+        if not only_d:
+            self.optimizer_G.step()
 
     def get_current_errors(self):
         return OrderedDict([

@@ -7,7 +7,7 @@ python train.py \
 --which_model_netD n_layers \
 --n_layers_D 1 \
 --which_direction AtoB \
---lambda_A 0.0 \
+--lambda_A 1.0 \
 --no_lsgan \
 --use_dropout \
 --input_nc 21 \

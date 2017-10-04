@@ -29,7 +29,7 @@ for epoch in range(1, opt.niter + opt.niter_decay + 1):
             if i == 0 and epoch == 1:
                 model.optimize_parameters()
             # else:
-            model.optimize_parameters(only_d=True)
+            model.optimize_parameters(only_d=False)
 
             if total_steps % opt.display_freq == 0:
                 # print model.get_current_visuals()

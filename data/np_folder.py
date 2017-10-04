@@ -35,11 +35,12 @@ class NpFolder(data.Dataset):
         output_path = os.path.join(path, self.label_name)
 
         indata = np.load(input_path)
-        outdata = np.load(output_path).astype(np.float32)/255.0
+        outdata = np.load(output_path)
 
         if self.conformal_mapper is not None:
             indata = self.conformal_mapper.disk_to_square(indata)
             outdata = self.conformal_mapper.disk_to_square(outdata)
+            # print outdata
         return {'A': indata, 'B': outdata}
 
     def __len__(self):

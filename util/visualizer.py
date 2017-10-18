@@ -93,6 +93,21 @@ class Visualizer():
                 'ylabel': 'loss'},
             win=self.display_id)
 
+    def plot_stopping_set_errors(self, epoch, counter_ratio, opt, errors):
+        if not hasattr(self, 'ss_plot_data'):
+            self.ss_plot_data = {'X':[],'Y':[], 'legend':list(errors.keys())}
+        self.ss_plot_data['X'].append(epoch + counter_ratio)
+        self.ss_plot_data['Y'].append([errors[k] for k in self.ss_plot_data['legend']])
+        self.vis.line(
+            X=np.stack([np.array(self.ss_plot_data['X'])]*len(self.ss_plot_data['legend']),1),
+            Y=np.array(self.ss_plot_data['Y']),
+            opts={
+                'title': 'Stopping set losses',
+                'legend': self.ss_plot_data['legend'],
+                'xlabel': 'epoch',
+                'ylabel': 'loss'},
+            win=6)
+
     def plot_current_filters(self, epoch, opt, filters):
         nfilt = np.shape(filters)[-1]
         ntime = np.shape(filters)[-2]

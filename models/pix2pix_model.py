@@ -88,7 +88,7 @@ class Pix2PixModel(BaseModel):
     # def get_image_paths(self):
     #     return self.image_paths
 
-    def backward_D(self):
+    def backward_D(self, apply_grads=True):
         # Fake
         # stop backprop to the generator by detaching fake_B
         fake_AB = self.fake_AB_pool.query(torch.cat((self.real_A, self.fake_B), 1))
@@ -103,7 +103,8 @@ class Pix2PixModel(BaseModel):
         # Combined loss
         self.loss_D = (self.loss_D_fake + self.loss_D_real) * 0.5
 
-        self.loss_D.backward()
+        if apply_grads:
+            self.loss_D.backward()
 
     def backward_G(self, apply_grads=True):
         # First, G(A) should fake the discriminator
@@ -146,6 +147,13 @@ class Pix2PixModel(BaseModel):
         self.backward_G(apply_grads=not only_d)
         if not only_d:
             self.optimizer_G.step()
+
+    def get_errors_for_input(self, data):
+        self.set_input(data)
+        self.forward()
+        self.backward_G(apply_grads=False)
+        self.backward_D(apply_grads=False)
+        return self.get_current_errors()
 
     def get_current_errors(self):
         return OrderedDict([

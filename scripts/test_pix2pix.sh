@@ -9,7 +9,7 @@ python test.py \
 --batchSize 32 \
 --output_nc 3 \
 --warp_to_square \
---use_dropout \
---how_many 50
+--how_many 50 \
+--load_dir test_snmov \
 #--display_channel 0
 # --load_dir current_best \

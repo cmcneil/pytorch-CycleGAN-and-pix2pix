@@ -4,6 +4,9 @@ def CreateDataLoader(opt):
     if opt.name == 'mrf':
         from data.aligned_data_loader import AlignedNpDataLoader
         data_loader = AlignedNpDataLoader()
+    elif opt.name == 'brain2pix':
+        from aligned_data_loader import AlignedNpDataLoader
+        data_loader = AlignedNpDataLoader()
     elif opt.align_data:
         from data.aligned_data_loader import AlignedDataLoader
         data_loader = AlignedDataLoader()

@@ -1,3 +1,4 @@
+from argparse import Namespace
 import time
 import sys
 from options.train_options import TrainOptions
@@ -16,7 +17,16 @@ print('#training images = %d' % dataset_size)
 model = create_model(opt)
 visualizer = Visualizer(opt)
 
+# Prepare the stopping set, to look at test set progress.
+modopt = Namespace(**vars(opt))
+vars(modopt)['phase'] = 'test'
+print modopt.phase
+stopping_set_loader = CreateDataLoader(modopt)
+stopping_set = iter(stopping_set_loader.load_data())
+
 total_steps = 0
+stop_idx = 0
+print dir(stopping_set)
 
 for epoch in range(1, opt.niter + opt.niter_decay + 1):
     epoch_start_time = time.time()
@@ -41,7 +51,15 @@ for epoch in range(1, opt.niter + opt.niter_decay + 1):
                 errors = model.get_current_errors()
                 visualizer.print_current_errors(epoch, epoch_iter, errors, iter_start_time)
                 if opt.display_id > 0:
-                    visualizer.plot_current_errors(epoch, float(epoch_iter)/dataset_size, opt, errors)
+                    visualizer.plot_current_errors(epoch, float(epoch_iter)/dataset_size,
+                                                   opt, errors)
+                    if i % 12 == 0:
+                        stopping_set = iter(stopping_set_loader.load_data())
+                    val_dset = stopping_set.next()
+                    stopping_set_errors = model.get_errors_for_input(val_dset)
+
+                    visualizer.plot_stopping_set_errors(epoch, float(epoch_iter)/dataset_size,
+                                                        opt, stopping_set_errors)
 
             if total_steps % opt.save_latest_freq == 0:
                 print('saving the latest model (epoch %d, total_steps %d)' %

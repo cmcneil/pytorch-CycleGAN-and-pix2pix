@@ -7,7 +7,7 @@ python train.py \
 --which_model_netD n_layers \
 --n_layers_D 1 \
 --which_direction AtoB \
---lambda_A 1.0 \
+--lambda_A 5.0 \
 --no_lsgan \
 --use_dropout \
 --input_nc 21 \
@@ -16,11 +16,12 @@ python train.py \
 --print_freq 10 \
 --ganloss 1.0 \
 --print_freq 1 \
---niter 10000 \
+--niter 150 \
 --lr 0.001 \
 --warp_to_square
-#--load_dir current_best \
 #--continue_train \
+#--load_dir current_best \
+
 
 
 

@@ -73,7 +73,7 @@ class AlignedNpDataLoader(BaseDataLoader):
         dataset = NpFolder(root=opt.dataroot + '/' + opt.phase,
                            input_name='mri.npy', label_name='im.npy',
                            return_paths=True, input_nc=opt.input_nc,
-                           conformal_mapper=conformal_mapper)
+                           conformal_mapper=conformal_mapper, opt=opt)
         print '.......Length of dataset: ' + str(len(dataset))
         data_loader = torch.utils.data.DataLoader(
             dataset,

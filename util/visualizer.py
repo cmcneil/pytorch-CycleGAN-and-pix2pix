@@ -40,7 +40,7 @@ class Visualizer():
                 print label
                 print 'shape im: ' + str(np.shape(image_numpy))
                 print 'max im: ' + str(np.max(image_numpy))
-                self.vis.image(image_numpy.transpose([0, 2, 1]), #[::-1, ...],
+                self.vis.image(image_numpy.transpose([0, 2, 1]).reshape((15, 3, 128, 128))[7, ...], #[::-1, ...],
                                opts=dict(title=label),
                                win=self.display_id + idx)
                 idx += 1

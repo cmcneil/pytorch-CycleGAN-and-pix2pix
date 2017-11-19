@@ -9,7 +9,7 @@ class NpFolder(data.Dataset):
 
     def __init__(self, root=None, input_name=None, label_name=None,
                  transform=None, return_paths=False, input_nc=None,
-                 conformal_mapper=None):
+                 conformal_mapper=None, opt=None):
         """
         """
         print "data root: " + str(root)
@@ -24,9 +24,10 @@ class NpFolder(data.Dataset):
         self.return_paths = return_paths
         self.input_nc = input_nc
         self.conformal_mapper = conformal_mapper
-        print '******************'
-        print "self.ims: " + str(self.ims)
-        print '*********'
+        self.opt = opt
+        # print '******************'
+        # print "self.ims: " + str(self.ims)
+        # print '*********'
 
     def __getitem__(self, index):
         n = self.ims[index]
@@ -41,6 +42,7 @@ class NpFolder(data.Dataset):
             indata = self.conformal_mapper.disk_to_square(indata)
             outdata = self.conformal_mapper.disk_to_square(outdata)
             # print outdata
+        assert np.shape(outdata)[0] == self.opt.output_nc
         return {'A': indata, 'B': outdata}
 
     def __len__(self):

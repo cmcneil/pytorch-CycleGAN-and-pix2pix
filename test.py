@@ -24,12 +24,18 @@ visualizer = Visualizer(opt)
 for i, data in enumerate(dataset):
     if i >= opt.how_many:
         break
+    print "... A:" + str(data['A'].size()) + "... B:" + str(data['B'].size())
     model.set_input(data)
     model.test()
     visuals = model.get_current_ims(whole_batch=True)
     print np.shape(visuals)
     for label, np_data in visuals.items():
+        print label
         print np.shape(np_data)
         for j in range(np.shape(np_data)[0]):
-            plt.imsave('../images/im_' + label + '_' + str(i*opt.batchSize+j) + '.png',
-                       np_data[j, ...].T, cmap='viridis')
+            if np.shape(np_data[j, ...])[0] == 45:
+                np.save('../images/im_' + label + '_' + str(i*opt.batchSize+j) + '.npy',
+                        np.reshape(np_data[j, ...], (15, 3, 128, 128)))
+            else:
+                plt.imsave('../images/im_' + label + '_' + str(i*opt.batchSize+j) + '.png',
+                           np_data[j, ...].T, cmap='viridis')

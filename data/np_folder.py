@@ -3,12 +3,13 @@ import torch.utils.data as data
 import os
 import os.path
 import numpy as np
+import skimage.transform
 
 
 class NpFolder(data.Dataset):
 
     def __init__(self, root=None, input_name=None, label_name=None,
-                 transform=None, return_paths=False, input_nc=None,
+                 scale_size=None, return_paths=False, input_nc=None,
                  conformal_mapper=None, opt=None):
         """
         """
@@ -25,9 +26,7 @@ class NpFolder(data.Dataset):
         self.input_nc = input_nc
         self.conformal_mapper = conformal_mapper
         self.opt = opt
-        # print '******************'
-        # print "self.ims: " + str(self.ims)
-        # print '*********'
+        self.scale_size = scale_size
 
     def __getitem__(self, index):
         n = self.ims[index]
@@ -42,6 +41,19 @@ class NpFolder(data.Dataset):
             indata = self.conformal_mapper.disk_to_square(indata)
             outdata = self.conformal_mapper.disk_to_square(outdata)
             # print outdata
+        if self.scale_size is not None and self.scale_size != indata.shape[-1]:
+            if len(indata.shape) != 3 or len(outdata.shape) != 3:
+                raise ValueError("The fineSize option only makes sense when your "
+                                 + "data is of shape (channels, width, height)")
+            new_in_shape = list(indata.shape)
+            new_in_shape[-1] = self.scale_size
+            new_in_shape[-2] = self.scale_size
+            new_out_shape = list(outdata.shape)
+            new_out_shape[-1] = self.scale_size
+            new_out_shape[-2] = self.scale_size
+
+            indata = skimage.transform.resize(indata, tuple(new_in_shape))
+            outdata = skimage.transform.resize(outdata, tuple(new_out_shape))
         assert np.shape(outdata)[0] == self.opt.output_nc
         return {'A': indata, 'B': outdata}
 

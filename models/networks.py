@@ -18,10 +18,14 @@ def weights_init(m):
         m.bias.data.fill_(0)
 
 
-def define_G(input_nc, output_nc, ngf, which_model_netG, norm, use_dropout=False, gpu_ids=[]):
+def define_G(input_nc, output_nc, ngf, which_model_netG, norm, input_size,
+             use_dropout=False, gpu_ids=None, run_on_cpu=False):
     netG = None
-    # gpu_ids = []
-    use_gpu = len(gpu_ids) > 0
+    use_gpu = False
+    if gpu_ids is not None:
+        use_gpu = len(gpu_ids) > 0 if not run_on_cpu else False
+    if not use_gpu:
+        gpu_ids = []
     if norm == 'batch':
         norm_layer = nn.BatchNorm2d
     elif norm == 'instance':
@@ -36,9 +40,9 @@ def define_G(input_nc, output_nc, ngf, which_model_netG, norm, use_dropout=False
     elif which_model_netG == 'resnet_6blocks':
         netG = ResnetGenerator(input_nc, output_nc, ngf, norm_layer, use_dropout=use_dropout, n_blocks=6, gpu_ids=gpu_ids)
     elif which_model_netG == 'unet_128':
-        netG = UnetGenerator(input_nc, output_nc, 7, ngf, norm_layer, use_dropout=use_dropout, gpu_ids=gpu_ids)
+        netG = UnetGenerator(input_nc, output_nc, int(np.log2(input_size)), ngf, norm_layer, use_dropout=use_dropout, gpu_ids=gpu_ids)
     elif which_model_netG == 'unet_256':
-        netG = UnetGenerator(input_nc, output_nc, 8, ngf, norm_layer, use_dropout=use_dropout, gpu_ids=gpu_ids)
+        netG = UnetGenerator(input_nc, output_nc, int(np.log2(input_size)), ngf, norm_layer, use_dropout=use_dropout, gpu_ids=gpu_ids)
     else:
         print('Generator model name [%s] is not recognized' % which_model_netG)
     if len(gpu_ids) > 0:
@@ -48,10 +52,11 @@ def define_G(input_nc, output_nc, ngf, which_model_netG, norm, use_dropout=False
 
 
 def define_D(input_nc, ndf, which_model_netD,
-             n_layers_D=3, use_sigmoid=False, gpu_ids=[]):
+             n_layers_D=3, use_sigmoid=False, gpu_ids=[], run_on_cpu=False):
     netD = None
-    # gpu_ids = []
-    use_gpu = len(gpu_ids) > 0
+    use_gpu = len(gpu_ids) > 0 if not run_on_cpu else False
+    if not use_gpu:
+        gpu_ids = []
     if use_gpu:
         assert(torch.cuda.is_available())
     if which_model_netD == 'basic':
@@ -244,6 +249,7 @@ class UnetSkipConnectionBlock(nn.Module):
                  output_nc=None, use_dropout=False):
         super(UnetSkipConnectionBlock, self).__init__()
         self.outermost = outermost
+        self.innermost = innermost
 
         downconv = nn.Conv2d(outer_nc, inner_nc, kernel_size=4,
                              stride=2, padding=1)
@@ -290,6 +296,8 @@ class UnetSkipConnectionBlock(nn.Module):
             return self.model(x)
         else:
             # print '...unet concat block: ' + str(x.size())
+            # if self.innermost:
+            #     print '...innermost block...'
             # print '...Unet block concat: ' + str(self.model(x).size()) + ', ' + str(x.size())
             return torch.cat([self.model(x), x], 1)
 

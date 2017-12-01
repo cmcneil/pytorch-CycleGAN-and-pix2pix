@@ -1,13 +1,11 @@
 import numpy as np
 import torch
-import os
 from collections import OrderedDict
 from torch.autograd import Variable
 import util.util as util
 from util.image_pool import ImagePool
 from .base_model import BaseModel
 from . import networks
-import custom_loss as cust
 from cone.image import conformal
 
 from IPython.core.debugger import set_trace
@@ -27,13 +25,15 @@ class Pix2PixModel(BaseModel):
 
         # load/define networks
         self.netG = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf,
-                                      opt.which_model_netG, opt.norm, opt.use_dropout, self.gpu_ids)
+                                      opt.which_model_netG, opt.norm, opt.fineSize,
+                                      opt.use_dropout, self.gpu_ids, run_on_cpu=opt.run_on_cpu)
         if self.isTrain:
             use_sigmoid = opt.no_lsgan
             self.netD = networks.define_D(opt.input_nc + opt.output_nc,
                                           opt.ndf,
                                           opt.which_model_netD,
-                                          opt.n_layers_D, use_sigmoid, self.gpu_ids)
+                                          opt.n_layers_D, use_sigmoid, self.gpu_ids,
+                                          run_on_cpu=opt.run_on_cpu)
         if not self.isTrain or opt.continue_train:
             self.load_network(self.netG, 'G', opt.which_epoch)
             if self.isTrain:
@@ -75,6 +75,9 @@ class Pix2PixModel(BaseModel):
         # print '...Input size:'
         # print self.input_A.size()
         self.real_A = Variable(self.input_A)
+        # print "INPUT VARS:"
+        # print(self.real_A)
+        # print(self.input_B)
         self.fake_B = self.netG.forward(self.real_A)
         self.real_B = Variable(self.input_B)
 

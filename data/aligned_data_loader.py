@@ -42,7 +42,7 @@ class PairedData(object):
         return {'A': A, 'A_paths': AB_paths, 'B': B, 'B_paths': AB_paths}
 
 
-class LoaderIter(object):
+class NpLoaderIter(object):
     def __init__(self, loader, fine_size, max_dataset_size):
         self.loader = loader
         self.max_dataset_size = max_dataset_size
@@ -57,14 +57,29 @@ class LoaderIter(object):
         self.iter += 1
         if self.iter > self.max_dataset_size:
             raise StopIteration
-        return next(self.loader_iter)
+        d = next(self.loader_iter)
+        mri_indata = d['A']
+        im_outdata = d['B']
+
+        w = mri_indata.size(3)
+        h = mri_indata.size(2)
+
+        w_offset = random.randint(0, max(0, w - self.fine_size - 1))
+        h_offset = random.randint(0, max(0, h - self.fine_size - 1))
+        A = mri_indata[:, :, h_offset:h_offset + self.fine_size,
+                       w_offset:w_offset + self.fine_size]
+        B = im_outdata[:, :, h_offset:h_offset + self.fine_size,
+                       w_offset:w_offset + self.fine_size]
+        return {'A': A, 'B': B}
 
 
 class AlignedNpDataLoader(BaseDataLoader):
     def initialize(self, opt):
         BaseDataLoader.initialize(self, opt)
         self.fineSize = opt.fineSize
-
+        # transform = transforms.Compose([
+        #     transforms.Scale(opt.loadSize),
+        #     transforms.ToTensor()])
         # Dataset A
         if opt.warp_to_square:
             conformal_mapper = conformal.FGSquircularMapper(res=128)
@@ -73,7 +88,8 @@ class AlignedNpDataLoader(BaseDataLoader):
         dataset = NpFolder(root=opt.dataroot + '/' + opt.phase,
                            input_name='mri.npy', label_name='im.npy',
                            return_paths=True, input_nc=opt.input_nc,
-                           conformal_mapper=conformal_mapper, opt=opt)
+                           conformal_mapper=conformal_mapper,
+                           scale_size=opt.loadSize, opt=opt)
         print '.......Length of dataset: ' + str(len(dataset))
         data_loader = torch.utils.data.DataLoader(
             dataset,
@@ -83,8 +99,8 @@ class AlignedNpDataLoader(BaseDataLoader):
 
         data_loader = data_loader
         self.dataset = dataset
-        self.loader_iter = LoaderIter(data_loader, opt.fineSize,
-                                      opt.max_dataset_size)
+        self.loader_iter = NpLoaderIter(data_loader, opt.fineSize,
+                                        opt.max_dataset_size)
 
     def name(self):
         return 'AlignedNpDataLoader'

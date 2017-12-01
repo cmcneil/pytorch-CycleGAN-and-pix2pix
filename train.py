@@ -3,7 +3,6 @@ import time
 import sys
 from options.train_options import TrainOptions
 opt = TrainOptions().parse()  # set CUDA_VISIBLE_DEVICES before import torch
-# opt.gpu_ids = []
 
 from data.data_loader import CreateDataLoader
 from models.models import create_model
@@ -26,7 +25,6 @@ stopping_set = iter(stopping_set_loader.load_data())
 
 total_steps = 0
 stop_idx = 0
-print dir(stopping_set)
 
 for epoch in range(1, opt.niter + opt.niter_decay + 1):
     epoch_start_time = time.time()

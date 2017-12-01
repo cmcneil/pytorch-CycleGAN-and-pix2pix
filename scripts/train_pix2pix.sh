@@ -8,6 +8,8 @@ python train.py \
 --n_layers_D 1 \
 --which_direction AtoB \
 --lambda_A 5.0 \
+--loadSize 128 \
+--fineSize 64 \
 --no_lsgan \
 --use_dropout \
 --input_nc 21 \
@@ -18,6 +20,7 @@ python train.py \
 --print_freq 1 \
 --niter 500 \
 --lr 0.001 \
---warp_to_square
+--warp_to_square \
+# --run_on_cpu
 #--continue_train \
 #--load_dir current_best \

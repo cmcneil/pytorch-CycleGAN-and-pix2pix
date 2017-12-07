@@ -4,7 +4,6 @@ import ntpath
 import time
 from . import util
 from . import html
-from scipy.ndimage import zoom
 
 class Visualizer():
     def __init__(self, opt):
@@ -16,7 +15,7 @@ class Visualizer():
         self.fine_size = opt.fineSize
         if self.display_id > 0:
             import visdom
-            self.vis = visdom.Visdom()
+            self.vis = visdom.Visdom(env=opt.visdom_env)
 
         if self.use_html:
             self.web_dir = os.path.join(opt.checkpoints_dir, opt.name, 'web')
@@ -42,9 +41,12 @@ class Visualizer():
                 print label
                 print 'shape im: ' + str(np.shape(image_numpy))
                 print 'max im: ' + str(np.max(image_numpy))
-                im_transform = zoom(image_numpy.transpose([0, 2, 1])
-                                 .reshape((15, 3, self.fine_size, self.fine_size)),
-                                 (1, 1, 4, 4))[7, ...]
+                # im_transform = zoom(image_numpy.transpose([0, 2, 1])
+                #                  .reshape((15, 3, self.fine_size, self.fine_size)),
+                #                  (1, 1, 4, 4))[7, ...]
+                im_transform = image_numpy.transpose([0, 2, 1]
+                                ).reshape((15, 3, self.fine_size,
+                                           self.fine_size))[7, ...]
                 self.vis.image(im_transform, #[::-1, ...],
                                opts=dict(title=label),
                                win=self.display_id + idx)

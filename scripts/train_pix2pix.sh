@@ -5,9 +5,9 @@ python train.py \
 --align_data \
 --which_model_netG unet_128 \
 --which_model_netD n_layers \
---n_layers_D 1 \
+--n_layers_D 3 \
 --which_direction AtoB \
---lambda_A 5.0 \
+--lambda_A 1.0 \
 --loadSize 128 \
 --fineSize 64 \
 --no_lsgan \
@@ -18,9 +18,10 @@ python train.py \
 --print_freq 10 \
 --ganloss 1.0 \
 --print_freq 1 \
---niter 500 \
+--niter 1000 \
 --lr 0.001 \
+--gpu_ids 0 \
 --warp_to_square \
+# --continue_train \
+# --load_dir patch_halfway \
 # --run_on_cpu
-#--continue_train \
-#--load_dir current_best \

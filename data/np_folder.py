@@ -27,6 +27,9 @@ class NpFolder(data.Dataset):
         self.conformal_mapper = conformal_mapper
         self.opt = opt
         self.scale_size = scale_size
+        # print '******************'
+        # print "self.ims: " + str(self.ims)
+        # print '*********'
 
     def __getitem__(self, index):
         n = self.ims[index]
@@ -41,7 +44,7 @@ class NpFolder(data.Dataset):
             indata = self.conformal_mapper.disk_to_square(indata)
             outdata = self.conformal_mapper.disk_to_square(outdata)
             # print outdata
-        if self.scale_size is not None and self.scale_size != indata.shape[-1]:
+        if self.scale_size is not None and self.scale_size != indata.shape:
             if len(indata.shape) != 3 or len(outdata.shape) != 3:
                 raise ValueError("The fineSize option only makes sense when your "
                                  + "data is of shape (channels, width, height)")

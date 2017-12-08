@@ -111,13 +111,10 @@ class Pix2PixModel(BaseModel):
 
     def backward_G(self, apply_grads=True):
         # First, G(A) should fake the discriminator
-        print "devices: "
-
         fake_AB = torch.cat((self.real_A, self.fake_B), 1)
         pred_fake = self.netD.forward(fake_AB)
         self.loss_G_GAN = self.criterionGAN(pred_fake, True)
-        print fake_AB.current_device()
-        print self.real_B.current_device()
+
         # Second, G(A) = B
         self.loss_G_L1 = self.criterionL1(self.fake_B, self.real_B) * self.opt.lambda_A
         # print '...real A: ' + str(self.real_A)

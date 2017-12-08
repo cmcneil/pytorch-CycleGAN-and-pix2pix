@@ -1,5 +1,6 @@
 from argparse import Namespace
 import time
+import torch
 import sys
 from options.train_options import TrainOptions
 opt = TrainOptions().parse()  # set CUDA_VISIBLE_DEVICES before import torch
@@ -26,7 +27,8 @@ stopping_set = iter(stopping_set_loader.load_data())
 total_steps = 0
 stop_idx = 0
 
-for epoch in range(1, opt.niter + opt.niter_decay + 1):
+
+def run_epoch(epoch, total_steps):
     epoch_start_time = time.time()
     try:
         for i, data in enumerate(dataset):
@@ -78,3 +80,11 @@ for epoch in range(1, opt.niter + opt.niter_decay + 1):
 
     if epoch > opt.niter:
         model.update_learning_rate()
+
+
+for epoch in range(1, opt.niter + opt.niter_decay + 1):
+    if len(opt.gpu_ids) == 1:
+        with torch.cuda.device(opt.gpu_ids[0]):
+            run_epoch(epoch, total_steps)
+    else:
+        run_epoch(epoch, total_steps)
